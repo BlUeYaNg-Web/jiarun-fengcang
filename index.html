@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>丰藏建案導覽</title>
+  <meta name="description" content="家泰嘉潤丰藏，土城暫緩重劃區核心、金城路核心地標，未來萬大線 LG10 站約 350 米，尊榮 2~3 房質感宅。" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:   { DEFAULT: '#2b2926', soft: '#3a3733', deep: '#1f1d1b' },
+            milk:  { DEFAULT: '#c8b49a', light: '#e6dccd', pale: '#f5f0e8' },
+            earth: { DEFAULT: '#8b7560', dark: '#6b5a49' },
+            gold:  { DEFAULT: '#b8975a', light: '#d4b97f', dark: '#96783f' },
+            paper: '#faf7f2',
+          },
+          fontFamily: {
+            serif: ['"Noto Serif TC"', 'serif'],
+            sans:  ['"Noto Sans TC"', 'sans-serif'],
+            display: ['"Cormorant Garamond"', 'serif'],
+          },
+          letterSpacing: { luxe: '0.3em' },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html { scroll-padding-top: 80px; }
+    body { -webkit-font-smoothing: antialiased; background: #faf7f2; color: #2b2926; font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+    #header { padding-top: env(safe-area-inset-top, 0px); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+    /* 捲動浮現動畫 */
+    .reveal-armed .reveal { opacity: 0; transform: translateY(32px); } .reveal { transition: opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1); }
+    .reveal-armed .reveal.is-visible { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: .15s; }
+    .reveal-delay-2 { transition-delay: .3s; }
+    .reveal-delay-3 { transition-delay: .45s; }
+
+    /* Hero 緩慢縮放 */
+    @keyframes kenburns { from { transform: scale(1.12); } to { transform: scale(1); } }
+    .hero-bg { animation: kenburns 14s ease-out forwards; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    .fade-up { opacity: 0; animation: fadeUp 1.2s cubic-bezier(.2,.7,.2,1) forwards; }
+
+    @keyframes scrollHint { 0% { transform: translateY(0); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateY(14px); opacity: 0; } }
+    .scroll-dot { animation: scrollHint 2s ease-in-out infinite; }
+
+    /* 金色細線 */
+    .gold-line { width: 48px; height: 1px; background: linear-gradient(90deg, transparent, #b8975a, transparent); }
+
+    /* 導覽列底線 */
+    .nav-link { position: relative; }
+    .nav-link::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 0; height: 1px; background: #b8975a; transition: all .35s ease; transform: translateX(-50%); }
+    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+    /* FAQ */
+    .faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s ease; }
+    .faq-item.open .faq-body { grid-template-rows: 1fr; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+    /* Modal */
+    .modal { opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+    .modal.show { opacity: 1; pointer-events: auto; }
+    .modal .modal-panel { transform: translateY(20px) scale(.98); transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+    .modal.show .modal-panel { transform: none; }
+
+    /* 表單元件 */
+    .field { width: 100%; background: transparent; border: 0; border-bottom: 1px solid #c8b49a; padding: .75rem 0; color: #2b2926; outline: none; transition: border-color .3s; border-radius: 0; }
+    .field:focus { border-color: #b8975a; }
+    .field::placeholder { color: #a89a88; }
+    .field.error { border-color: #b4553f; }
+    select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8975a' fill='none' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; padding-right: 24px; }
+
+    .chip input { display: none; }
+    .chip span { display: inline-block; padding: .55rem 1.1rem; border: 1px solid #c8b49a; color: #6b5a49; font-size: .875rem; letter-spacing: .08em; cursor: pointer; transition: all .3s; }
+    .chip input:checked + span { background: #2b2926; border-color: #2b2926; color: #e6dccd; }
+    .chip span:hover { border-color: #b8975a; }
+
+    /* 紙紋理 */
+    .paper-texture { background-color: #faf7f2; background-image: radial-gradient(rgba(139,117,96,.05) 1px, transparent 1px); background-size: 18px 18px; }
+
+    .img-zoom img { transition: transform 1.2s cubic-bezier(.2,.7,.2,1); }
+    .img-zoom:hover img { transform: scale(1.06); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal, .fade-up { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+  <!-- ============ Header ============ -->
+  <header id="header" class="fixed inset-x-0 top-0 z-40 transition-all duration-500">
+    <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-10">
+      <a href="#top" class="group flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center border border-gold/70 font-serif text-lg text-gold">丰</span>
+        <span class="leading-tight">
+          <span class="logo-text block font-serif text-lg tracking-[0.25em] text-white transition-colors">家泰嘉潤丰藏</span>
+          <span class="logo-sub block font-display text-[10px] tracking-luxe text-milk-light/80 transition-colors">JIA RUN FENG CANG</span>
+        </span>
+        <span class="ml-1 hidden border border-milk-light/40 px-2 py-0.5 text-[10px] tracking-widest text-milk-light/80 sm:inline-block">非官方介紹</span>
+      </a>
+
+      <nav class="hidden items-center gap-9 lg:flex" aria-label="主選單">
+        <a href="#features"  class="nav-link text-sm tracking-widest text-white/85 transition-colors hover:text-gold-light">建案特色</a>
+        <a href="#traffic"   class="nav-link text-sm tracking-widest text-white/85 transition-colors hover:text-gold-light">交通機能</a>
+        <a href="#lifestyle" class="nav-link text-sm tracking-widest text-white/85 transition-colors hover:text-gold-light">生活配套</a>
+        <a href="#specs"     class="nav-link text-sm tracking-widest text-white/85 transition-colors hover:text-gold-light">規劃規格</a>
+        <a href="#booking"   class="nav-link text-sm tracking-widest text-white/85 transition-colors hover:text-gold-light">線上預約</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button data-open-modal class="hidden bg-gold px-6 py-2.5 text-sm tracking-widest text-white transition hover:bg-gold-dark sm:inline-block">
+          立即預約賞屋
+        </button>
+        <button id="menuBtn" class="flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden" aria-label="開啟選單" aria-expanded="false">
+          <span class="burger block h-px w-6 bg-white transition-all"></span>
+          <span class="burger block h-px w-6 bg-white transition-all"></span>
+          <span class="burger block h-px w-4 self-end bg-white transition-all"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 手機選單 -->
+    <div id="mobileMenu" class="pointer-events-none fixed inset-0 top-20 bg-ink-deep/95 opacity-0 backdrop-blur-md transition-opacity duration-400 lg:hidden">
+      <nav class="flex flex-col items-center gap-8 pt-16" aria-label="手機選單">
+        <a href="#features"  class="mobile-link font-serif text-xl tracking-[0.3em] text-milk-light">建案特色</a>
+        <a href="#traffic"   class="mobile-link font-serif text-xl tracking-[0.3em] text-milk-light">交通機能</a>
+        <a href="#lifestyle" class="mobile-link font-serif text-xl tracking-[0.3em] text-milk-light">生活配套</a>
+        <a href="#specs"     class="mobile-link font-serif text-xl tracking-[0.3em] text-milk-light">規劃規格</a>
+        <a href="#booking"   class="mobile-link font-serif text-xl tracking-[0.3em] text-milk-light">線上預約</a>
+        <div class="gold-line my-2"></div>
+        <button data-open-modal class="border border-gold px-10 py-3 tracking-widest text-gold-light">立即預約賞屋</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ Hero ============ -->
+    <section class="relative flex items-center overflow-hidden bg-ink-deep pb-24 pt-40 lg:pb-36 lg:pt-48">
+      <div class="absolute inset-0">
+        <img class="hero-bg h-full w-full object-cover"
+             src="img/hero.jpg"
+             alt="現代建築外觀示意" />
+        <div class="absolute inset-0 bg-gradient-to-b from-ink-deep/70 via-ink-deep/40 to-ink-deep/85"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-ink-deep/70 via-transparent to-transparent"></div>
+      </div>
+
+      <div class="relative mx-auto w-full max-w-7xl px-5 lg:px-10">
+        <p class="fade-up mb-6 font-display text-sm tracking-luxe text-gold-light" style="animation-delay:.2s">TUCHENG · JINCHENG RD.</p>
+        <h1 class="fade-up font-serif text-4xl font-semibold leading-tight tracking-[0.12em] text-white sm:text-5xl lg:text-7xl" style="animation-delay:.4s">
+          尊榮地脈<span class="mx-2 text-gold sm:mx-4">‧</span><br class="sm:hidden" />雙捷核心<br />
+          <span class="text-milk-light">質感生活</span>
+        </h1>
+        <div class="fade-up my-8 flex items-center gap-4" style="animation-delay:.6s">
+          <span class="h-px w-16 bg-gold"></span>
+          <span class="font-display text-xs tracking-luxe text-gold-light">SINCE 2026</span>
+        </div>
+        <p class="fade-up max-w-xl text-base font-light leading-loose tracking-wider text-white/85 sm:text-lg" style="animation-delay:.8s">
+          土城暫緩重劃區核心，金城路核心地標，<br class="hidden sm:block" />尊榮 2~3 房質感宅
+        </p>
+        <div class="fade-up mt-10 flex flex-col gap-4 sm:flex-row" style="animation-delay:1s">
+          <button data-open-modal class="bg-gold px-10 py-4 tracking-[0.25em] text-white shadow-lg shadow-black/20 transition hover:bg-gold-dark">
+            快速預約賞屋
+          </button>
+          <a href="#features" class="border border-white/40 px-10 py-4 text-center tracking-[0.25em] text-white transition hover:border-gold-light hover:text-gold-light">
+            探索建案
+          </a>
+        </div>
+        <p class="fade-up mt-10 max-w-xl text-xs leading-relaxed tracking-wider text-white/60" style="animation-delay:1.2s">本頁為建案資訊整理介紹，非家泰建築、嘉潤開發官方網站。</p>
+      </div>
+
+      <a href="#features" class="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-white/60 sm:flex" aria-label="向下捲動">
+        <span class="font-display text-[10px] tracking-luxe">SCROLL</span>
+        <span class="relative block h-10 w-px bg-white/25"><span class="scroll-dot absolute -left-[2px] top-0 h-1.5 w-1.5 rounded-full bg-gold-light"></span></span>
+      </a>
+    </section>
+
+    <!-- 數據帶 -->
+    <section class="border-b border-milk/40 bg-ink text-milk-light">
+      <div class="mx-auto grid max-w-7xl grid-cols-2 divide-milk/15 px-5 lg:grid-cols-4 lg:divide-x lg:px-10">
+        <div class="reveal py-8 text-center"><p class="font-display text-4xl text-gold-light">350<span class="ml-1 text-base">m</span></p><p class="mt-2 text-xs tracking-widest text-milk/80">未來萬大線 LG10 站</p></div>
+        <div class="reveal reveal-delay-1 py-8 text-center"><p class="font-display text-4xl text-gold-light">720<span class="ml-1 text-base">坪</span></p><p class="mt-2 text-xs tracking-widest text-milk/80">基地面積（約）</p></div>
+        <div class="reveal reveal-delay-2 py-8 text-center"><p class="font-display text-4xl text-gold-light">19<span class="ml-1 text-base">F</span></p><p class="mt-2 text-xs tracking-widest text-milk/80">地上 19 層 / 地下 4 層</p></div>
+        <div class="reveal reveal-delay-3 py-8 text-center"><p class="font-display text-4xl text-gold-light">152<span class="ml-1 text-base">戶</span></p><p class="mt-2 text-xs tracking-widest text-milk/80">總戶數（含店面）</p></div>
+      </div>
+    </section>
+
+    <!-- ============ Highlights ============ -->
+    <section id="features" class="paper-texture py-24 lg:py-32">
+      <div class="mx-auto max-w-7xl px-5 lg:px-10">
+        <div class="reveal mb-16 text-center lg:mb-20">
+          <p class="font-display text-sm tracking-luxe text-gold">HIGHLIGHTS</p>
+          <h2 class="mt-4 font-serif text-3xl tracking-[0.2em] text-ink lg:text-4xl">建案三大核心亮點</h2>
+          <div class="gold-line mx-auto mt-6"></div>
+        </div>
+
+        <div class="grid gap-8 md:grid-cols-3 lg:gap-10">
+          <!-- 亮點 1 -->
+          <article class="reveal group bg-white shadow-[0_20px_50px_-30px_rgba(43,41,38,.35)]">
+            <div class="img-zoom relative aspect-[4/3] overflow-hidden bg-milk-light">
+              <img class="h-full w-full object-cover" loading="lazy"
+                   src="img/h1.jpg" alt="建築立面示意" />
+              <span class="absolute left-5 top-5 font-display text-5xl text-white/90">01</span>
+            </div>
+            <div class="p-8">
+              <p class="text-xs tracking-luxe text-gold">強強聯手</p>
+              <h3 class="mt-3 font-serif text-xl tracking-widest text-ink">家泰建築 × 嘉潤開發</h3>
+              <div class="my-5 h-px w-10 bg-milk"></div>
+              <p class="text-sm leading-loose tracking-wide text-earth-dark">雙品牌攜手打造，以精緻建築工藝與嚴謹施工管理，落實高標準保固承諾，讓居住安心更長久。</p>
+            </div>
+          </article>
+
+          <!-- 亮點 2 -->
+          <article id="traffic" class="reveal reveal-delay-1 group bg-white shadow-[0_20px_50px_-30px_rgba(43,41,38,.35)]">
+            <div class="img-zoom relative aspect-[4/3] overflow-hidden bg-milk-light">
+              <img class="h-full w-full object-cover" loading="lazy"
+                   src="img/h2.jpg" alt="軌道交通示意" />
+              <span class="absolute left-5 top-5 font-display text-5xl text-white/90">02</span>
+            </div>
+            <div class="p-8">
+              <p class="text-xs tracking-luxe text-gold">雙捷交通</p>
+              <h3 class="mt-3 font-serif text-xl tracking-widest text-ink">萬大線 LG10 站約 350 米</h3>
+              <div class="my-5 h-px w-10 bg-milk"></div>
+              <p class="text-sm leading-loose tracking-wide text-earth-dark">未來萬大線 LG10 站步行可及，直達台北市區；車行快速對接台 65 線與國道三號，南北往返從容自如。</p>
+            </div>
+          </article>
+
+          <!-- 亮點 3 -->
+          <article class="reveal reveal-delay-2 group bg-white shadow-[0_20px_50px_-30px_rgba(43,41,38,.35)]">
+            <div class="img-zoom relative aspect-[4/3] overflow-hidden bg-milk-light">
+              <img class="h-full w-full object-cover" loading="lazy"
+                   src="img/h3.jpg" alt="高速公路交流道示意" />
+              <span class="absolute left-5 top-5 font-display text-5xl text-white/90">03</span>
+            </div>
+            <div class="p-8">
+              <p class="text-xs tracking-luxe text-gold">金城交流道</p>
+              <h3 class="mt-3 font-serif text-xl tracking-widest text-ink">預計增設國三金城交流道</h3>
+              <div class="my-5 h-px w-10 bg-milk"></div>
+              <p class="text-sm leading-loose tracking-wide text-earth-dark">預計增設國道三號金城交流道，距基地約 350 米，未來上下國道更便捷，通勤出行效率倍升。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Specs ============ -->
+    <section id="specs" class="bg-ink py-24 text-milk-light lg:py-32">
+      <div class="mx-auto grid max-w-7xl items-center gap-14 px-5 lg:grid-cols-2 lg:gap-20 lg:px-10">
+        <div class="reveal relative order-2 lg:order-1">
+          <div class="img-zoom relative aspect-[4/5] overflow-hidden bg-ink-soft">
+            <img class="h-full w-full object-cover" loading="lazy"
+                 src="img/specs.jpg" alt="日系質感室內空間示意" />
+          </div>
+          <div class="absolute -bottom-6 -right-2 hidden border border-gold/60 bg-ink px-8 py-6 sm:block lg:-right-8">
+            <p class="font-display text-xs tracking-luxe text-gold">LAYOUT</p>
+            <p class="mt-2 font-serif text-2xl tracking-widest">2~3 房</p>
+          </div>
+          <div class="absolute -left-3 -top-3 h-24 w-24 border-l border-t border-gold/60"></div>
+        </div>
+
+        <div class="order-1 lg:order-2">
+          <div class="reveal">
+            <p class="font-display text-sm tracking-luxe text-gold">SPECIFICATIONS</p>
+            <h2 class="mt-4 font-serif text-3xl tracking-[0.2em] lg:text-4xl">建案詳細規格</h2>
+            <div class="gold-line mt-6"></div>
+          </div>
+
+          <dl class="mt-10 divide-y divide-milk/15 border-y border-milk/15">
+            <div class="reveal grid grid-cols-[7rem_1fr] gap-4 py-5 sm:grid-cols-[9rem_1fr]">
+              <dt class="text-sm tracking-widest text-gold-light">基地面積</dt><dd class="tracking-wider">約 720 坪</dd>
+            </div>
+            <div class="reveal grid grid-cols-[7rem_1fr] gap-4 py-5 sm:grid-cols-[9rem_1fr]">
+              <dt class="text-sm tracking-widest text-gold-light">樓層規劃</dt><dd class="tracking-wider">地上 19 層 / 地下 4 層</dd>
+            </div>
+            <div class="reveal grid grid-cols-[7rem_1fr] gap-4 py-5 sm:grid-cols-[9rem_1fr]">
+              <dt class="text-sm tracking-widest text-gold-light">格局規劃</dt>
+              <dd class="flex flex-wrap gap-3">
+                <span class="border border-milk/30 px-3 py-1 text-sm tracking-wider">2 房｜20~25 坪</span>
+                <span class="border border-milk/30 px-3 py-1 text-sm tracking-wider">3 房｜31~33 坪</span>
+              </dd>
+            </div>
+            <div class="reveal grid grid-cols-[7rem_1fr] gap-4 py-5 sm:grid-cols-[9rem_1fr]">
+              <dt class="text-sm tracking-widest text-gold-light">總戶數</dt><dd class="tracking-wider">152 戶（包含店面）</dd>
+            </div>
+            <div class="reveal grid grid-cols-[7rem_1fr] gap-4 py-5 sm:grid-cols-[9rem_1fr]">
+              <dt class="text-sm tracking-widest text-gold-light">公設規劃</dt>
+              <dd class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm tracking-wider text-milk-light/90">
+                <span>◆ 日系美學大廳</span><span>◆ 咖啡酒吧區</span>
+                <span>◆ 共享閱覽室</span><span>◆ 健身房</span>
+                <span>◆ 中庭花園</span><span class="text-milk/60">⋯ 等</span>
+              </dd>
+            </div>
+          </dl>
+
+          <button data-open-modal class="reveal mt-10 border border-gold px-10 py-4 tracking-[0.25em] text-gold-light transition hover:bg-gold hover:text-white">
+            索取格局平面圖
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Lifestyle ============ -->
+    <section id="lifestyle" class="py-24 lg:py-32">
+      <div class="mx-auto max-w-7xl px-5 lg:px-10">
+        <div class="reveal mb-16 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div>
+            <p class="font-display text-sm tracking-luxe text-gold">LIFESTYLE &amp; LOCATION</p>
+            <h2 class="mt-4 font-serif text-3xl tracking-[0.2em] lg:text-4xl">周邊生活機能</h2>
+            <div class="gold-line mt-6"></div>
+          </div>
+          <p class="max-w-md text-sm leading-loose tracking-wide text-earth-dark">捷運、國道、商圈、綠地與學區一次到位。以金城路為軸心，串聯土城、板橋最成熟的生活圈。</p>
+        </div>
+
+        <div class="grid gap-px overflow-hidden bg-milk/40 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="reveal bg-paper p-8 transition hover:bg-white lg:p-10">
+            <svg class="h-9 w-9 text-gold" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l-2 0M15 21h2M8 17l-2 4M16 17l2 4"/><circle cx="9" cy="14" r=".6" fill="currentColor"/><circle cx="15" cy="14" r=".6" fill="currentColor"/></svg>
+            <h3 class="mt-6 font-serif text-lg tracking-[0.25em]">交通</h3>
+            <p class="font-display text-xs tracking-luxe text-milk">TRANSPORT</p>
+            <ul class="mt-6 space-y-3 text-sm tracking-wide text-earth-dark">
+              <li class="flex gap-2"><span class="text-gold">—</span>捷運海山站</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>未來萬大線 LG10 站</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>國道三號</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>台 65 快速道路</li>
+            </ul>
+          </div>
+          <div class="reveal reveal-delay-1 bg-paper p-8 transition hover:bg-white lg:p-10">
+            <svg class="h-9 w-9 text-gold" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><path d="M4 8h16l-1.5 12h-13L4 8z"/><path d="M8.5 8V6a3.5 3.5 0 017 0v2"/></svg>
+            <h3 class="mt-6 font-serif text-lg tracking-[0.25em]">商圈</h3>
+            <p class="font-display text-xs tracking-luxe text-milk">SHOPPING</p>
+            <ul class="mt-6 space-y-3 text-sm tracking-wide text-earth-dark">
+              <li class="flex gap-2"><span class="text-gold">—</span>清水商圈</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>家樂福商圈</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>裕民商圈</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>日月光廣場</li>
+            </ul>
+          </div>
+          <div class="reveal reveal-delay-2 bg-paper p-8 transition hover:bg-white lg:p-10">
+            <svg class="h-9 w-9 text-gold" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><path d="M12 3c-3.5 3-5 6-5 9a5 5 0 0010 0c0-3-1.5-6-5-9z"/><path d="M12 21v-9M12 15l-2.5-2M12 13l2-1.5"/></svg>
+            <h3 class="mt-6 font-serif text-lg tracking-[0.25em]">綠意與體育</h3>
+            <p class="font-display text-xs tracking-luxe text-milk">GREEN &amp; SPORTS</p>
+            <ul class="mt-6 space-y-3 text-sm tracking-wide text-earth-dark">
+              <li class="flex gap-2"><span class="text-gold">—</span>土城國民運動中心</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>新龍山遺址文化公園</li>
+            </ul>
+          </div>
+          <div class="reveal reveal-delay-3 bg-paper p-8 transition hover:bg-white lg:p-10">
+            <svg class="h-9 w-9 text-gold" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><path d="M3 8l9-4 9 4-9 4-9-4z"/><path d="M7 10v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5M21 8v6"/></svg>
+            <h3 class="mt-6 font-serif text-lg tracking-[0.25em]">學區</h3>
+            <p class="font-display text-xs tracking-luxe text-milk">EDUCATION</p>
+            <ul class="mt-6 space-y-3 text-sm tracking-wide text-earth-dark">
+              <li class="flex gap-2"><span class="text-gold">—</span>中正國中</li>
+              <li class="flex gap-2"><span class="text-gold">—</span>廣福國小</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 圖片帶 -->
+        <div class="mt-16 grid grid-cols-2 gap-4 lg:grid-cols-3">
+          <div class="reveal img-zoom col-span-2 aspect-[16/9] overflow-hidden bg-milk-light lg:col-span-2 lg:aspect-auto">
+            <img class="h-full w-full object-cover" loading="lazy" src="img/living.jpg" alt="質感客廳示意" />
+          </div>
+          <div class="reveal reveal-delay-1 img-zoom aspect-square overflow-hidden bg-milk-light">
+            <img class="h-full w-full object-cover" loading="lazy" src="img/cafe.jpg" alt="咖啡吧示意" />
+          </div>
+          <div class="reveal img-zoom aspect-square overflow-hidden bg-milk-light lg:hidden">
+            <img class="h-full w-full object-cover" loading="lazy" src="img/gym.jpg" alt="健身房示意" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Booking ============ -->
+    <section id="booking" class="relative overflow-hidden bg-milk-pale py-24 lg:py-32">
+      <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full border border-gold/20"></div>
+      <div class="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full border border-gold/15"></div>
+
+      <div class="relative mx-auto grid max-w-6xl gap-14 px-5 lg:grid-cols-5 lg:px-10">
+        <div class="reveal lg:col-span-2">
+          <p class="font-display text-sm tracking-luxe text-gold">RESERVATION</p>
+          <h2 class="mt-4 font-serif text-3xl leading-snug tracking-[0.2em] lg:text-4xl">預約<br class="hidden lg:block" />專屬賞屋</h2>
+          <div class="gold-line mt-6"></div>
+          <p class="mt-8 text-sm leading-loose tracking-wide text-earth-dark">這份表單可以試填，看看預約會問哪些資料。實際賞屋預約，請直接洽詢建案接待中心。</p>
+          <ul class="mt-8 space-y-3 text-sm tracking-wider text-ink-soft">
+            <li class="flex items-center gap-3"><span class="h-px w-5 bg-gold"></span>專人一對一解說</li>
+            <li class="flex items-center gap-3"><span class="h-px w-5 bg-gold"></span>格局平面圖索取</li>
+            <li class="flex items-center gap-3"><span class="h-px w-5 bg-gold"></span>週邊環境實地導覽</li>
+          </ul>
+        </div>
+
+        <div class="reveal reveal-delay-1 bg-white p-8 shadow-[0_30px_70px_-40px_rgba(43,41,38,.45)] sm:p-12 lg:col-span-3">
+          <form class="booking-form space-y-8" novalidate></form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section id="faq" class="paper-texture py-24 lg:py-32">
+      <div class="mx-auto max-w-3xl px-5 lg:px-10">
+        <div class="reveal mb-14 text-center">
+          <p class="font-display text-sm tracking-luxe text-gold">FAQ</p>
+          <h2 class="mt-4 font-serif text-3xl tracking-[0.2em] lg:text-4xl">常見問題</h2>
+          <div class="gold-line mx-auto mt-6"></div>
+        </div>
+
+        <div class="reveal divide-y divide-milk/60 border-y border-milk/60">
+          <div class="faq-item">
+            <button class="faq-btn flex w-full items-center justify-between gap-6 py-6 text-left" aria-expanded="false">
+              <span class="flex gap-4"><span class="font-display text-lg text-gold">Q.</span><span class="font-serif tracking-widest">預計完工時間與目前進度？</span></span>
+              <span class="faq-icon shrink-0 text-2xl font-light text-gold transition-transform duration-300">+</span>
+            </button>
+            <div class="faq-body"><div class="overflow-hidden">
+              <p class="pb-6 pl-9 text-sm leading-loose tracking-wide text-earth-dark">本案目前為預售階段，實際開工、完工與交屋時程依建照核准內容及工程進度為準。最新進度歡迎預約賞屋，由接待中心專人為您說明。</p>
+            </div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-btn flex w-full items-center justify-between gap-6 py-6 text-left" aria-expanded="false">
+              <span class="flex gap-4"><span class="font-display text-lg text-gold">Q.</span><span class="font-serif tracking-widest">周邊未來重大建設發展？</span></span>
+              <span class="faq-icon shrink-0 text-2xl font-light text-gold transition-transform duration-300">+</span>
+            </button>
+            <div class="faq-body"><div class="overflow-hidden">
+              <p class="pb-6 pl-9 text-sm leading-loose tracking-wide text-earth-dark">基地周邊主要規劃包含：捷運萬大線 LG10 站（約 350 米）、國道三號金城交流道（預計增設，約 350 米），以及土城暫緩發展區重劃計畫。各項建設時程以主管機關公告為準。</p>
+            </div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-btn flex w-full items-center justify-between gap-6 py-6 text-left" aria-expanded="false">
+              <span class="flex gap-4"><span class="font-display text-lg text-gold">Q.</span><span class="font-serif tracking-widest">車位規劃形式？</span></span>
+              <span class="faq-icon shrink-0 text-2xl font-light text-gold transition-transform duration-300">+</span>
+            </button>
+            <div class="faq-body"><div class="overflow-hidden">
+              <p class="pb-6 pl-9 text-sm leading-loose tracking-wide text-earth-dark">全區規劃為<strong class="font-medium text-ink">坡道平面車位</strong>，進出免排隊等候機械升降，停車動線直覺順暢。車位配置與尺寸請以銷售中心提供之圖說為準。</p>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer ============ -->
+  <footer class="bg-ink-deep pb-28 pt-16 text-milk/70 sm:pb-12">
+    <div class="mx-auto max-w-7xl px-5 lg:px-10">
+      <div class="flex flex-col items-start justify-between gap-10 border-b border-milk/10 pb-10 lg:flex-row lg:items-center">
+        <div class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center border border-gold/70 font-serif text-lg text-gold">丰</span>
+          <span>
+            <span class="block font-serif text-lg tracking-[0.25em] text-milk-light">家泰嘉潤丰藏</span>
+            <span class="block font-display text-[10px] tracking-luxe text-milk/60">JIA RUN FENG CANG</span>
+          </span>
+        </div>
+        <nav class="flex flex-wrap gap-x-8 gap-y-3 text-sm tracking-widest">
+          <a href="#features" class="transition hover:text-gold-light">建案特色</a>
+          <a href="#traffic" class="transition hover:text-gold-light">交通機能</a>
+          <a href="#lifestyle" class="transition hover:text-gold-light">生活配套</a>
+          <a href="#specs" class="transition hover:text-gold-light">規劃規格</a>
+          <a href="#booking" class="transition hover:text-gold-light">線上預約</a>
+        </nav>
+      </div>
+      <p class="mt-8 text-xs leading-relaxed tracking-wider text-milk/55">
+        【免責聲明】本網頁為建案示意介紹，非家泰建築、嘉潤開發或代銷公司之官方網站。實際規格與條款以現場銷售中心及買賣合約書為主。網頁內圖片均為 Unsplash 情境示意，非實際建物外觀或室內規劃。
+      </p>
+      <p class="mt-4 text-xs tracking-wider text-milk/40">© <span id="year"></span> 建案資訊整理介紹頁。建案名稱與商標屬各權利人所有。</p>
+    </div>
+  </footer>
+
+  <!-- 手機底部固定 CTA -->
+  <div class="safe-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 border-t border-gold/30 bg-ink/95 backdrop-blur sm:hidden">
+    <a href="#lifestyle" class="py-4 text-center text-sm tracking-widest text-milk-light">生活機能</a>
+    <button data-open-modal class="bg-gold py-4 text-sm tracking-widest text-white">立即預約賞屋</button>
+  </div>
+
+  <!-- 回到頂端 -->
+  <a href="#top" id="toTop" class="fixed bottom-20 right-5 z-30 flex h-11 w-11 translate-y-4 items-center justify-center border border-gold/60 bg-white/90 text-gold opacity-0 shadow transition-all duration-300 hover:bg-gold hover:text-white sm:bottom-8" aria-label="回到頂端">↑</a>
+
+  <!-- ============ 預約 Modal ============ -->
+  <div id="bookingModal" class="modal fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 backdrop-blur-sm sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+    <div class="modal-panel relative max-h-[92vh] w-full max-w-lg overflow-y-auto bg-paper p-8 sm:p-10">
+      <button data-close-modal class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center text-2xl font-light text-earth transition hover:text-gold" aria-label="關閉">×</button>
+      <p class="font-display text-xs tracking-luxe text-gold">RESERVATION</p>
+      <h3 id="bookingTitle" class="mt-2 font-serif text-2xl tracking-[0.2em]">預約賞屋</h3>
+      <div class="gold-line mt-4"></div>
+      <form class="booking-form mt-8 space-y-7" novalidate></form>
+    </div>
+  </div>
+
+  <!-- ============ 成功 Modal ============ -->
+  <div id="successModal" class="modal fixed inset-0 z-[60] flex items-center justify-center bg-ink-deep/70 p-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+    <div class="modal-panel w-full max-w-sm bg-paper px-8 py-12 text-center">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gold">
+        <svg class="h-7 w-7 text-gold" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <h3 id="successTitle" class="mt-6 font-serif text-2xl tracking-[0.2em]">試填完成</h3>
+      <p class="mt-4 text-sm leading-loose tracking-wide text-earth-dark"><span id="successName"></span>您好，這是示意表單，資料沒有送出。<br />想預約賞屋，請直接洽詢建案接待中心，並告知方便聯絡時段：<span id="successTime" class="text-gold-dark"></span>。</p>
+      <button data-close-modal class="mt-8 bg-ink px-10 py-3 text-sm tracking-[0.25em] text-milk-light transition hover:bg-gold">確認</button>
+    </div>
+  </div>
+
+  <!-- 表單模板（同時用於頁面區塊與彈窗） -->
+  <template id="formTpl">
+    <div>
+      <label class="text-xs tracking-widest text-earth">姓名 <span class="text-gold">*</span></label>
+      <input name="name" type="text" class="field" placeholder="請輸入您的姓名" autocomplete="name" />
+      <p class="err mt-1 hidden text-xs text-[#b4553f]">請輸入姓名</p>
+    </div>
+    <div>
+      <label class="text-xs tracking-widest text-earth">聯絡電話 <span class="text-gold">*</span></label>
+      <input name="phone" type="tel" class="field" placeholder="例：0912-345-678" autocomplete="tel" inputmode="tel" />
+      <p class="err mt-1 hidden text-xs text-[#b4553f]">請輸入正確的電話號碼</p>
+    </div>
+    <fieldset>
+      <legend class="mb-3 text-xs tracking-widest text-earth">預約坪數 <span class="text-gold">*</span></legend>
+      <div class="flex flex-wrap gap-3">
+        <label class="chip"><input type="radio" name="layout" value="2 房（20~25 坪）" /><span>2 房</span></label>
+        <label class="chip"><input type="radio" name="layout" value="3 房（31~33 坪）" /><span>3 房</span></label>
+        <label class="chip"><input type="radio" name="layout" value="不限" checked /><span>不限</span></label>
+      </div>
+    </fieldset>
+    <div>
+      <label class="text-xs tracking-widest text-earth">方便聯絡時間</label>
+      <select name="time" class="field">
+        <option value="任何時段">任何時段皆可</option>
+        <option value="平日上午 (09:00-12:00)">平日上午 (09:00-12:00)</option>
+        <option value="平日下午 (13:00-18:00)">平日下午 (13:00-18:00)</option>
+        <option value="平日晚上 (18:00-21:00)">平日晚上 (18:00-21:00)</option>
+        <option value="假日">假日</option>
+      </select>
+    </div>
+    <label class="flex items-start gap-3 text-xs leading-relaxed tracking-wide text-earth">
+      <input name="agree" type="checkbox" class="mt-0.5 accent-[#b8975a]" />
+      <span>我了解這是示意表單，送出後資料不會傳給任何人，也不會有人主動聯繫。</span>
+    </label>
+    <p class="err-agree -mt-5 hidden text-xs text-[#b4553f]">請勾選同意後再送出</p>
+    <button type="submit" class="w-full bg-ink py-4 tracking-[0.3em] text-milk-light transition hover:bg-gold">試填送出</button>
+  </template>
+
+  <script>
+    (() => {
+      const $  = (s, c = document) => c.querySelector(s);
+      const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+
+      $('#year').textContent = new Date().getFullYear();
+
+      /* ---------- Header 捲動樣式 ---------- */
+      const header = $('#header');
+      const toTop = $('#toTop');
+      const onScroll = () => {
+        const scrolled = window.scrollY > 60;
+        header.classList.toggle('bg-ink/95', scrolled);
+        header.classList.toggle('backdrop-blur-md', scrolled);
+        header.classList.toggle('shadow-lg', scrolled);
+        toTop.classList.toggle('opacity-0', window.scrollY < 600);
+        toTop.classList.toggle('translate-y-4', window.scrollY < 600);
+        toTop.classList.toggle('pointer-events-none', window.scrollY < 600);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      /* ---------- 手機選單 ---------- */
+      const menuBtn = $('#menuBtn');
+      const mobileMenu = $('#mobileMenu');
+      const bars = $$('.burger');
+      const setMenu = (open) => {
+        mobileMenu.classList.toggle('opacity-0', !open);
+        mobileMenu.classList.toggle('pointer-events-none', !open);
+        menuBtn.setAttribute('aria-expanded', open);
+        bars[0].style.transform = open ? 'translateY(7px) rotate(45deg)' : '';
+        bars[1].style.opacity   = open ? '0' : '';
+        bars[2].style.transform = open ? 'translateY(-7px) rotate(-45deg)' : '';
+        bars[2].style.width     = open ? '1.5rem' : '';
+        document.body.style.overflow = open ? 'hidden' : '';
+      };
+      menuBtn.addEventListener('click', () => setMenu(menuBtn.getAttribute('aria-expanded') !== 'true'));
+      $$('.mobile-link').forEach(a => a.addEventListener('click', () => setMenu(false)));
+
+      /* ---------- 平滑滾動（補強 Safari 舊版） ---------- */
+      $$('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          const id = a.getAttribute('href');
+          const target = id === '#top' ? document.body : $(id);
+          if (!target) return;
+          e.preventDefault();
+          const y = id === '#top' ? 0 : target.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        });
+      });
+
+      /* ---------- 導覽列 active 狀態 ---------- */
+      const navLinks = $$('header nav .nav-link');
+      const sections = navLinks.map(a => $(a.getAttribute('href'))).filter(Boolean);
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (!en.isIntersecting) return;
+          navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      sections.forEach(s => spy.observe(s));
+
+      /* ---------- 捲動浮現 ---------- */
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.documentElement.classList.add('reveal-armed');
+      $$('.reveal').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('is-visible');
+        else io.observe(el);
+      });
+
+      /* ---------- FAQ Accordion ---------- */
+      $$('.faq-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.faq-item');
+          const willOpen = !item.classList.contains('open');
+          $$('.faq-item').forEach(i => { i.classList.remove('open'); $('.faq-btn', i).setAttribute('aria-expanded', 'false'); });
+          if (willOpen) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+        });
+      });
+
+      /* ---------- Modal ---------- */
+      const bookingModal = $('#bookingModal');
+      const successModal = $('#successModal');
+      let lastFocus = null;
+      const openModal = (m) => {
+        lastFocus = document.activeElement;
+        m.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => { const f = $('input, button', m); f && f.focus(); }, 50);
+      };
+      const closeModal = (m) => {
+        m.classList.remove('show');
+        if (!$$('.modal.show').length) document.body.style.overflow = '';
+        lastFocus && lastFocus.focus && lastFocus.focus();
+      };
+      $$('[data-open-modal]').forEach(b => b.addEventListener('click', () => { setMenu(false); openModal(bookingModal); }));
+      $$('.modal').forEach(m => {
+        m.addEventListener('click', (e) => { if (e.target === m || e.target.closest('[data-close-modal]')) closeModal(m); });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') $$('.modal.show').forEach(closeModal);
+      });
+
+      /* ---------- 表單 ---------- */
+      const tpl = $('#formTpl');
+      $$('.booking-form').forEach((form, idx) => {
+        form.appendChild(tpl.content.cloneNode(true));
+        // 讓兩份表單的 radio 群組互不干擾
+        $$('input[type=radio]', form).forEach(r => r.name = 'layout' + idx);
+
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name  = form.elements.name;
+          const phone = form.elements.phone;
+          const agree = form.elements.agree;
+          const phoneOk = /^0\d{1,3}-?\d{3,4}-?\d{3,4}$/.test(phone.value.replace(/\s/g, ''));
+          const checks = [[name, name.value.trim().length > 0], [phone, phoneOk]];
+          let valid = true;
+          checks.forEach(([el, ok]) => {
+            el.classList.toggle('error', !ok);
+            el.parentElement.querySelector('.err').classList.toggle('hidden', ok);
+            if (!ok) valid = false;
+          });
+          $('.err-agree', form).classList.toggle('hidden', agree.checked);
+          if (!agree.checked) valid = false;
+          if (!valid) return;
+
+          const data = {
+            name: name.value.trim(),
+            phone: phone.value.trim(),
+            layout: $('input[type=radio]:checked', form).value,
+            time: form.elements.time.value,
+          };
+          // 此處為前端示意，實際上線請串接後端 API（例如 fetch('/api/booking', { method: 'POST', body: JSON.stringify(data) })）
+          console.log('[預約資料]', data);
+
+          $('#successName').textContent = data.name + ' ';
+          $('#successTime').textContent = data.time;
+          form.reset();
+          if (bookingModal.classList.contains('show')) closeModal(bookingModal);
+          openModal(successModal);
+        });
+
+        // 輸入時清除錯誤
+        $$('.field', form).forEach(f => f.addEventListener('input', () => {
+          f.classList.remove('error');
+          const err = f.parentElement.querySelector('.err');
+          err && err.classList.add('hidden');
+        }));
+      });
+    })();
+  </script>
+
+</body>
+</html>
